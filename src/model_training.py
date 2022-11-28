@@ -72,7 +72,6 @@ model_path = f'./training_files/{modelname}_best_model'
 model.save_model(model_path)
 
 # predict test data
-
 model = CatBoostClassifier()
 model.load_model(model_path)
 preds = model.predict(pool_test)
