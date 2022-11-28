@@ -1,21 +1,25 @@
+## model tuning
+import platform; print(platform.platform())
+import sys; print("Python", sys.version)
+
 # imports
 import numpy as np
 import pandas as pd
+import joblib
 
 from sklearn.model_selection import train_test_split
 from catboost import CatBoostClassifier, Pool
 
 import optuna
 from optuna.samplers import TPESampler
-import joblib
 
 # setup
 modelname = 'catboost'
 seed=42
 
 # prepare data
-train = pd.read_csv('./data/final/train.csv')
-test = pd.read_csv('./data/final/test.csv')
+train = pd.read_csv('../data/final/train.csv')
+test = pd.read_csv('../data/final/test.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
@@ -32,36 +36,28 @@ print(f'Target: {TARGET}')
 print(f'Fetaures:\n\tnumerical: {numerical}\n\tcategorical:{categorical}')
 print(f'Shapes:\n\ttrain: {train.shape}\n\ttest: {test.shape}\n')
 
-# data splitting
+# split data
 x, x_val, y, y_val = train_test_split(
-    train[FEATURES],
-    train[TARGET],
+    train[FEATURES], train[TARGET],
     test_size = 0.2,
-    random_state = 42
-)
+    random_state = np.random.randint(0,1000)
+    )
+
+pool_train = Pool(x, y, cat_features=categorical)
+pool_val = Pool(x_val, y_val, cat_features=categorical)
 
 # catboost fixed params
 fixed_params = {
     'custom_metric': ['Accuracy', 'AUC', 'F1'],
     'num_trees': 1e4,
-    'learning_rate': 0.1,
+    'learning_rate': 0.05,
     'random_seed': 42,
     'bootstrap_type': 'Bayesian',
     'allow_writing_files': False
 }
 
 # objective function for optuna
-def objective(trial, x, y):
-
-    # prepare data
-    x, x_val, y, y_val = train_test_split(
-        x, y,
-        test_size = 0.2,
-        random_state = np.random.randint(0,1000)
-    )
-
-    pool_train = Pool(x, y, cat_features=categorical)
-    pool_val = Pool(x_val, y_val, cat_features=categorical)
+def objective(trial, pool_train, pool_val):
 
     # define parameter space
     tuning_params = {
@@ -75,7 +71,7 @@ def objective(trial, x, y):
 
     params = {**fixed_params, **tuning_params}
 
-    # build and train model with trial hyperparameters
+    # train model with trial hyperparameters
     model = CatBoostClassifier(**params)
     model.fit(
         pool_train,
@@ -84,7 +80,7 @@ def objective(trial, x, y):
         verbose = 250
     )
 
-    # return accuracy validation score for the model
+    # return validation accuracy
     return model.best_score_['validation']['Accuracy']
 
 # perform optimization
@@ -99,8 +95,8 @@ study = optuna.create_study(
 
 print(f'Starting {modelname} optimization...\n')
 study.optimize(
-    lambda trial: objective(trial, x, y),
-    n_trials = 10,
+    lambda trial: objective(trial, pool_train, pool_val),
+    n_trials = 2,
     timeout=time_limit,
 )
 
@@ -115,12 +111,14 @@ for k, v in study.best_trial.params.items():
 tuned_params = study.best_trial.params
 best_params = {**fixed_params, **tuned_params}
 
-params_path = f'./src/training_files/{modelname}_best_params'
+params_path = f'./training_files/{modelname}_best_params.joblib'
 with open(params_path, "wb") as file:
-    joblib.dump(best_params, params_path)
+    joblib.dump(best_params, file)
 
 # print results
-best_params = joblib.load(params_path)
+with open(params_path, "rb") as file:
+    best_params = joblib.load(file)
+
 print("\nFinal parameters:")
 for k, v in best_params.items():
     print(f"\t{k}: {v}")
