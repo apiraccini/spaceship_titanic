@@ -1,11 +1,14 @@
 ## model tuning
+
 import platform; print(platform.platform())
 import sys; print("Python", sys.version)
 
 # imports
+import os
+import joblib
+
 import numpy as np
 import pandas as pd
-import joblib
 
 from sklearn.model_selection import train_test_split
 from catboost import CatBoostClassifier, Pool
@@ -96,7 +99,7 @@ study = optuna.create_study(
 print(f'Starting {modelname} optimization...\n')
 study.optimize(
     lambda trial: objective(trial, pool_train, pool_val),
-    n_trials = 2,
+    n_trials = 25,
     timeout=time_limit,
 )
 
@@ -111,6 +114,7 @@ for k, v in study.best_trial.params.items():
 tuned_params = study.best_trial.params
 best_params = {**fixed_params, **tuned_params}
 
+os.makedirs('./training_files', exist_ok=True)
 params_path = f'./training_files/{modelname}_best_params.joblib'
 with open(params_path, "wb") as file:
     joblib.dump(best_params, file)

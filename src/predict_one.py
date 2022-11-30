@@ -1,15 +1,12 @@
 ## model training
+
 import platform; print(platform.platform())
 import sys; print("Python", sys.version)
 
 # imports
-import os
-import joblib
-
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import train_test_split
 from catboost import CatBoostClassifier, Pool
 
 # setup
@@ -26,6 +23,7 @@ FEATURES = [col for col in train.columns if col not in [TARGET]]
 numerical = train[FEATURES].select_dtypes(include=np.number).columns.to_list()
 categorical = train[FEATURES].select_dtypes(exclude=np.number).columns.to_list()
 
+# utility function
 def get_features():
     out = {}
     print('\nSpace titanic model: enter features for prediction')
@@ -58,6 +56,7 @@ def get_features():
     return out
 
 if __name__ == '__main__':
+    
     # load model
     model_path = f'./training_files/{modelname}_best_model'
     model = CatBoostClassifier()

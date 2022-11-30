@@ -1,4 +1,5 @@
 ## model training
+
 import platform; print(platform.platform())
 import sys; print("Python", sys.version)
 
@@ -68,6 +69,7 @@ model.fit(
 )
 
 # save best model
+os.makedirs('./training_files', exist_ok=True)
 model_path = f'./training_files/{modelname}_best_model'
 model.save_model(model_path)
 
