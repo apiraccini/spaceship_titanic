@@ -57,15 +57,16 @@ def get_features():
     out = pd.DataFrame.from_dict(out)
     return out
 
-xtest = get_features()
-pool_xtest = Pool(xtest, cat_features=categorical)
+if __name__ == '__main__':
+    # load model
+    model_path = f'./training_files/{modelname}_best_model'
+    model = CatBoostClassifier()
+    model.load_model(model_path)
 
-# load model
-model_path = f'./training_files/{modelname}_best_model'
-model = CatBoostClassifier()
-model.load_model(model_path)
+    # get features
+    xtest = get_features()
+    pool_xtest = Pool(xtest, cat_features=categorical)
 
-# prediction
-preds = model.predict(pool_xtest)[0]
-print(preds)
-print(f'\nThe prediction for {TARGET} is {bool(preds)}\n')
+    # prediction
+    preds = model.predict(pool_xtest)[0]
+    print(f'\nThe prediction for {TARGET} is {bool(preds)}\n')
