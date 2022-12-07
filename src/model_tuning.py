@@ -21,8 +21,8 @@ modelname = 'catboost'
 seed=42
 
 # prepare data
-train = pd.read_csv('../data/final/train.csv')
-test = pd.read_csv('../data/final/test.csv')
+train = pd.read_csv('./data/final/train.csv')
+test = pd.read_csv('./data/final/test.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
@@ -114,8 +114,8 @@ for k, v in study.best_trial.params.items():
 tuned_params = study.best_trial.params
 best_params = {**fixed_params, **tuned_params}
 
-os.makedirs('./training_files', exist_ok=True)
-params_path = f'./training_files/{modelname}_best_params.joblib'
+os.makedirs('./src/training_files', exist_ok=True)
+params_path = f'./src/training_files/{modelname}_best_params.joblib'
 with open(params_path, "wb") as file:
     joblib.dump(best_params, file)
 

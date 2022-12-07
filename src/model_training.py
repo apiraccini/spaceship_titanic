@@ -16,11 +16,11 @@ from catboost import CatBoostClassifier, Pool
 # setup
 modelname = 'catboost'
 seed=42
-params_path = f'./training_files/{modelname}_best_params.joblib'
+params_path = f'./src/training_files/{modelname}_best_params.joblib'
 
 # load data
-train = pd.read_csv('../data/final/train.csv')
-test = pd.read_csv('../data/final/test.csv')
+train = pd.read_csv('./data/final/train.csv')
+test = pd.read_csv('./data/final/test.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
@@ -69,8 +69,8 @@ model.fit(
 )
 
 # save best model
-os.makedirs('./training_files', exist_ok=True)
-model_path = f'./training_files/{modelname}_best_model'
+os.makedirs('./src/training_files', exist_ok=True)
+model_path = f'./src/training_files/{modelname}_best_model'
 model.save_model(model_path)
 
 # predict test data
@@ -78,8 +78,8 @@ model = CatBoostClassifier()
 model.load_model(model_path)
 preds = model.predict(pool_test)
 
-sub = pd.read_csv('../data/raw/sample_submission.csv')
+sub = pd.read_csv('./data/raw/sample_submission.csv')
 sub[TARGET] = preds.astype(bool)
 
-os.makedirs('../submissions', exist_ok=True)
-sub.to_csv('../submissions/catboost_tuned.csv', index=False)
+os.makedirs('./submissions', exist_ok=True)
+sub.to_csv('./submissions/catboost_tuned.csv', index=False)

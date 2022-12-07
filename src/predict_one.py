@@ -12,10 +12,10 @@ from catboost import CatBoostClassifier, Pool
 # setup
 modelname = 'catboost'
 seed=42
-params_path = f'./training_files/{modelname}_best_params.joblib'
+params_path = f'./src/training_files/{modelname}_best_params.joblib'
 
 # load data
-train = pd.read_csv('../data/final/train.csv')
+train = pd.read_csv('./data/final/train.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
@@ -58,7 +58,7 @@ def get_features():
 if __name__ == '__main__':
     
     # load model
-    model_path = f'./training_files/{modelname}_best_model'
+    model_path = f'./src/training_files/{modelname}_best_model'
     model = CatBoostClassifier()
     model.load_model(model_path)
 
