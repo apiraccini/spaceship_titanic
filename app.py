@@ -11,8 +11,6 @@ from catboost import CatBoostClassifier, Pool
 # declare a Flask app
 app = Flask(__name__) # An instance of this class will be our WSGI application.
 
-modelname = 'catboost'
-
 # main function
 # we  use the route() decorator to tell Flask what URL should trigger our function
 # the function returns the message we want to display in the user’s browser (here using {{output}}). The default content type is HTML
