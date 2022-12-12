@@ -1,3 +1,4 @@
 data
 venv
 submissions
+*/__pycache__

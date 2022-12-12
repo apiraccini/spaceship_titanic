@@ -9,10 +9,13 @@ from catboost import CatBoostClassifier, Pool
 
 
 # declare a Flask app
-app = Flask(__name__)
+app = Flask(__name__) # An instance of this class will be our WSGI application.
+
 modelname = 'catboost'
 
 # main function
+# we  use the route() decorator to tell Flask what URL should trigger our function
+# the function returns the message we want to display in the user’s browser (here using {{output}}). The default content type is HTML
 @app.route('/', methods=['GET', 'POST'])
 def main():
     
@@ -20,7 +23,7 @@ def main():
     if request.method == "POST":
         
         # load model
-        model_path = f'../src/training_files/{modelname}_best_model'
+        model_path = f'./src/training_files/catboost_best_model'
         model = CatBoostClassifier()
         model.load_model(model_path)
 
@@ -49,4 +52,4 @@ def main():
 
 # run the app
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = True) # host=0.0.0.0
