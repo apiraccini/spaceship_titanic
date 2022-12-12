@@ -22,6 +22,7 @@ FEATURES = [col for col in train.columns if col not in [TARGET]]
 
 numerical = train[FEATURES].select_dtypes(include=np.number).columns.to_list()
 categorical = train[FEATURES].select_dtypes(exclude=np.number).columns.to_list()
+print(categorical)
 
 # utility function
 def get_features():
