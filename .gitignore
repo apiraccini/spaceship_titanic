@@ -1,6 +1,8 @@
+.git
 data/
 venv/
 submissions/
+
 __pycache__/
 *.pyc
 *.pyo
