@@ -2,6 +2,7 @@
 data/
 venv/
 submissions/
+playground/
 
 __pycache__/
 *.pyc

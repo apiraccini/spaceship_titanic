@@ -53,7 +53,7 @@ pool_val = Pool(x_val, y_val, cat_features=categorical)
 fixed_params = {
     'custom_metric': ['Accuracy', 'AUC', 'F1'],
     'num_trees': 1e4,
-    'learning_rate': 0.05,
+    'learning_rate': 0.02,
     'random_seed': 42,
     'bootstrap_type': 'Bayesian',
     'allow_writing_files': False
