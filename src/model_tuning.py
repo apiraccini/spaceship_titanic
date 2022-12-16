@@ -34,9 +34,9 @@ train[categorical] = train[categorical].astype(str)
 train[TARGET] = train[TARGET].astype(float)
 test[categorical] = test[categorical].astype(str)
 
-print(f'\nModel: {modelname}')
+print(f'\nModel: {modelname}\n')
 print(f'Target: {TARGET}')
-print(f'Fetaures:\n\tnumerical: {numerical}\n\tcategorical:{categorical}')
+print(f'Features:\n\tnumerical: {numerical}\n\tcategorical:{categorical}')
 print(f'Shapes:\n\ttrain: {train.shape}\n\ttest: {test.shape}\n')
 
 # split data
@@ -66,15 +66,18 @@ def objective(trial, pool_train, pool_val):
     tuning_params = {
         'loss_function': trial.suggest_categorical('loss_function', ['Logloss', 'CrossEntropy']),
         'bagging_temperature': trial.suggest_float('bagging_temperature', 1, 25),
-        'random_strength': trial.suggest_float('random_strength', 1, 5),
+        'random_strength': trial.suggest_float('random_strength', 1, 10),
         'depth': trial.suggest_float('depth', 1, 12, step=1),
         'colsample_bylevel': trial.suggest_float('colsample_bylevel', 0.1, 0.8),
-        'l2_leaf_reg':trial.suggest_float('l2_leaf_reg', 0.0001, 0.1, log=True),
+        'l2_leaf_reg':trial.suggest_float('l2_leaf_reg', 0.00001, 0.1, log=True),
     }
 
     params = {**fixed_params, **tuning_params}
 
     # train model with trial hyperparameters
+    print('\n')
+    print(120*'*')
+    print(f'Training {modelname}...\n')
     model = CatBoostClassifier(**params)
     model.fit(
         pool_train,
@@ -82,25 +85,27 @@ def objective(trial, pool_train, pool_val):
         early_stopping_rounds=15,
         verbose = 250
     )
+    print(120*'*', '\n')
 
     # return validation accuracy
     return model.best_score_['validation']['Accuracy']
 
-# perform optimization
+# optimization setup
 time_limit = 3600 * 1
 np.random.seed(seed)
-sampler = TPESampler(seed=seed)
 
+sampler = TPESampler(seed=seed)
 study = optuna.create_study(
     sampler=sampler,
     study_name= f'{modelname}_optimization',
     direction='maximize')
 
-print(f'Starting {modelname} optimization...\n')
+# perform optimization
+print(f'Starting {modelname} optimization...')
 study.optimize(
     lambda trial: objective(trial, pool_train, pool_val),
-    n_trials = 25,
-    timeout=time_limit,
+    n_trials = 30,
+    timeout = time_limit,
 )
 
 # optimization results
