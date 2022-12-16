@@ -32,7 +32,7 @@ train[categorical] = train[categorical].astype(str)
 train[TARGET] = train[TARGET].astype(float)
 test[categorical] = test[categorical].astype(str)
 
-print(f'\nModel: {modelname}')
+print(f'\nModel: {modelname}\n')
 print(f'Target: {TARGET}')
 print(f'Features:\n\tnumerical: {numerical}\n\tcategorical:{categorical}')
 print(f'Shapes:\n\ttrain: {train.shape}\n\ttest: {test.shape}\n')
@@ -59,7 +59,9 @@ for k, v in best_params.items():
     print(f"\t{k}: {v}")
 
 # train model
-print(f'\nTraining {modelname}...')
+print('\n')
+print(120*'*')
+print(f'Training {modelname}...\n')
 model = CatBoostClassifier(**best_params)
 model.fit(
     pool_train,
@@ -67,6 +69,13 @@ model.fit(
     early_stopping_rounds=15,
     verbose = 500
 )
+print(120*'*', '\n')
+
+# score on eval.set
+accuracy = model.best_score_['validation']['Accuracy']
+f1 = model.best_score_['validation']['F1']
+auc = model.best_score_['validation']['AUC']
+print(f'Evaluation metrics:\n\taccuracy: {accuracy:.3f}\tF1 score: {f1:.3f}\tAUC: {auc:.3f}')
 
 # save best model
 os.makedirs('./src/training_files', exist_ok=True)
