@@ -7,11 +7,13 @@ import sys; print("Python", sys.version)
 import numpy as np
 import pandas as pd
 
-from catboost import CatBoostClassifier, Pool
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder 
+
+import joblib
 
 # setup
-modelname = 'catboost'
-seed=42
+modelname = 'xgb'
 params_path = f'./src/training_files/{modelname}_best_params.joblib'
 
 # load data
@@ -23,6 +25,14 @@ FEATURES = [col for col in train.columns if col not in [TARGET]]
 numerical = train[FEATURES].select_dtypes(include=np.number).columns.to_list()
 categorical = train[FEATURES].select_dtypes(exclude=np.number).columns.to_list()
 print(categorical)
+
+# preprocessing
+cat_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+preproc = ColumnTransformer(
+    transformers=[('cat', cat_encoder, categorical)],
+    verbose_feature_names_out=False,
+    remainder='passthrough'
+).set_output(transform='pandas')
 
 # utility function
 def get_features():
@@ -58,15 +68,20 @@ def get_features():
 
 if __name__ == '__main__':
     
+    # fit preprocessing pipeline
+    preproc = preproc.fit(train[FEATURES]) 
+
     # load model
-    model_path = f'./src/training_files/{modelname}_best_model'
-    model = CatBoostClassifier()
-    model.load_model(model_path)
+    model_path = f'./src/training_files/{modelname}_best_model.joblib'
+    with open(model_path, 'rb') as file:
+        model = joblib.load(file)
 
     # get features
     xtest = get_features()
-    pool_xtest = Pool(xtest, cat_features=categorical)
+    xtest = preproc.transform(xtest)
+    xtest.columns = model.get_booster().feature_names
 
     # prediction
-    preds = model.predict(pool_xtest)[0]
-    print(f'\nThe prediction for {TARGET} is {bool(preds)}\n')
+    preds = model.predict(xtest)
+    probs = model.predict_proba(xtest)[0][1]
+    print(f'\nThe prediction for {TARGET} is {bool(preds)} (predicted probability: {probs:.4f}\n')
