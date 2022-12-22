@@ -12,10 +12,13 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
+
 import xgboost as xgb
+import lightgbm as lgb
+import catboost
 
 # setup
-modelname = 'xgb'
+modelname = 'lgb'
 params_path = f'./src/training_files/studies/{modelname}_best_params.joblib'
 
 # load data
@@ -27,8 +30,8 @@ FEATURES = [col for col in train.columns if col not in [TARGET]]
 
 print(f'\nTarget: {TARGET}')
 print(f'Features: {FEATURES}')
-print(f'Shapes:\n\ttrain: {train.shape}\n\ttest: {test.shape}')
-print(f'Missing values:\n\ttrain: {train.isna().sum().sum()}\n\ttest: {test.isna().sum().sum()}')
+print(f'Shapes:\t{train.shape}\t{test.shape}')
+print(f'Missing values:\t{train.isna().sum().sum()}, {test.isna().sum().sum()}\n')
 
 # split data
 x, x_val, y, y_val = train_test_split(
@@ -41,28 +44,44 @@ x, x_val, y, y_val = train_test_split(
 # get best hyperparameters
 with open(params_path, 'rb') as path:
     best_params = joblib.load(path)
-print("\nHyper parameters:")
+print(f"Model: {modelname}\nHyper parameters:")
 for k, v in best_params.items():
     print(f"\t{k}: {v}")
+print('Setting number of trees to 10000 and learning rate to 0.005')
+best_params['n_estimators'] = 10000
+best_params['learning_rate'] = 0.005
+
+# define model
+if modelname == 'xgb':
+    model = xgb.XGBClassifier(**best_params)
+elif modelname == 'lgb':
+    model = lgb.LGBMClassifier(**best_params)
+elif modelname == 'catboost':
+    model = catboost.CatBoostClassifier(**best_params) 
 
 # train model
 print('\n')
 print(120*'*')
 print(f'Training {modelname}...\n')
-model = xgb.XGBClassifier(**best_params)
-model.fit(
-    x, y,
-    eval_set = [(x_val, y_val)],
-    verbose = 50
-)
+if modelname == 'xgb':
+    model.fit(
+        x, y,
+        eval_set= [(x_val, y_val)],
+        verbose = 200
+    )
+elif modelname == 'lgb' :
+    model.fit(
+        x, y,
+        eval_set= [(x_val, y_val)],
+        callbacks=[lgb.log_evaluation(200)]
+    )
 print(120*'*', '\n')
 
-# score on eval.set
-
+# score on evaluation set
 accuracy = accuracy_score(model.predict(x_val), y_val)
 f1 = f1_score(model.predict(x_val), y_val)
 auc = roc_auc_score(model.predict(x_val), y_val)
-print(f'Evaluation metrics:\n\taccuracy: {accuracy:.4f}\tF1 score: {f1:.4f}\tAUC: {auc:.4f}')
+print(f'Metrics on evaluation set:\n\taccuracy: {accuracy:.4f}\tF1 score: {f1:.4f}\tAUC: {auc:.4f}')
 
 # save best model
 os.makedirs('./src/training_files', exist_ok=True)
@@ -73,7 +92,6 @@ with open(model_path, 'wb') as file:
 # predict test data
 with open(model_path, 'rb') as file:
     model = joblib.load(file)
-#model = joblib.load(open(model_path, 'wb'))
 preds = model.predict(test)
 
 sub = pd.read_csv('./data/raw/sample_submission.csv')

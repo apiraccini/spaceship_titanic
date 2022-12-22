@@ -18,13 +18,13 @@ params_path = f'./src/training_files/{modelname}_best_params.joblib'
 
 # load data
 train = pd.read_csv('./data/final/train.csv')
+train_ohe = pd.read_csv('./data/final_ohe/train.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
 
 numerical = train[FEATURES].select_dtypes(include=np.number).columns.to_list()
 categorical = train[FEATURES].select_dtypes(exclude=np.number).columns.to_list()
-print(categorical)
 
 # preprocessing
 cat_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
@@ -70,6 +70,7 @@ if __name__ == '__main__':
     
     # fit preprocessing pipeline
     preproc = preproc.fit(train[FEATURES]) 
+    #print(preproc.get_feature_names_out())
 
     # load model
     model_path = f'./src/training_files/{modelname}_best_model.joblib'
@@ -79,9 +80,9 @@ if __name__ == '__main__':
     # get features
     xtest = get_features()
     xtest = preproc.transform(xtest)
-    xtest.columns = model.get_booster().feature_names
+    xtest.columns = train_ohe.drop(columns=TARGET).columns
 
     # prediction
     preds = model.predict(xtest)
     probs = model.predict_proba(xtest)[0][1]
-    print(f'\nThe prediction for {TARGET} is {bool(preds)} (predicted probability: {probs:.4f}\n')
+    print(f'\nThe prediction for {TARGET} is {bool(preds)} (predicted probability: {probs:.2%}).\n')
