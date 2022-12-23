@@ -12,9 +12,11 @@ from sklearn.preprocessing import OneHotEncoder
 
 import joblib
 
+import xgboost as xgb
+import lightgbm as lgb
+
 # setup
-modelname = 'xgb'
-params_path = f'./src/training_files/{modelname}_best_params.joblib'
+modelname = 'lgb'
 
 # load data
 train = pd.read_csv('./data/final/train.csv')
@@ -32,7 +34,7 @@ preproc = ColumnTransformer(
     transformers=[('cat', cat_encoder, categorical)],
     verbose_feature_names_out=False,
     remainder='passthrough'
-).set_output(transform='pandas')
+)
 
 # utility function
 def get_features():
@@ -66,11 +68,11 @@ def get_features():
     out = pd.DataFrame.from_dict(out)
     return out
 
+# main
 if __name__ == '__main__':
     
     # fit preprocessing pipeline
-    preproc = preproc.fit(train[FEATURES]) 
-    #print(preproc.get_feature_names_out())
+    preproc = preproc.fit(train[FEATURES])
 
     # load model
     model_path = f'./src/training_files/{modelname}_best_model.joblib'
@@ -80,9 +82,10 @@ if __name__ == '__main__':
     # get features
     xtest = get_features()
     xtest = preproc.transform(xtest)
-    xtest.columns = train_ohe.drop(columns=TARGET).columns
 
     # prediction
-    preds = model.predict(xtest)
+    preds = model.predict(np.array(xtest))
     probs = model.predict_proba(xtest)[0][1]
+    
+    # output message
     print(f'\nThe prediction for {TARGET} is {bool(preds)} (predicted probability: {probs:.2%}).\n')

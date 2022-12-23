@@ -1,8 +1,13 @@
 .git
 .gitignore
 
+venv/
 notebooks/
 submissions/
-venv/
+playground/
+
+__pycache__/
+*.pyc
+*.pyo
 
 *.md

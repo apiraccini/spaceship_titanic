@@ -9,31 +9,41 @@
         <p style="text-align: center;"><b>Spaceship titanic prediction</b></p>
         <form name="form", method="POST", style="text-align: center;">
             <br>
+            Age: <input type="number" name="Age" step="any" required/>
+            <br><br>
+            RoomService: <input type="number" name="RoomService" step="any" required/>
+            <br><br>
+            FoodCourt: <input type="number" name="FoodCourt" step="any" required/>
+            <br><br>
+            ShoppingMall: <input type="number" name="ShoppingMall" step="any" required/>
+            <br><br>
+            SPA: <input type="number" name="SPA" step="any" required/>
+            <br><br>
+            VRDeck: <input type="number" name="VRDeck" step="any" required/>
+            <br><br>
+            Expenditure: <input type="number" name="Expenditure" step="any" required/>
+            <br><br>
+            CabinNum: <input type="number" name="CabinNum" step="any" required/>
+            <br><br>
+            GroupSize: <input type="number" name="FamilySize" step="any" required/>
+            <br><br>
+            FamilySize: <input type="number" name="FamilySize" step="any" required/>
+            <br><br>
             HomePlanet: <input type="text" name="HomePlanet" step="any", placeholder="one of ['Europa' 'Earth' 'Mars' 'missing']" required/>
             <br><br>
             CryoSleep: <input type="text" name="CryoSleep" step="any", placeholder="one of ['False' 'True' 'missing']" required/>
             <br><br>
             Destination: <input type="text" name="Destination" step="any", placeholder="one of ['TRAPPIST-1e' 'PSO J318.5-22' '55 Cancri e' 'missing']" required/>
             <br><br>
-            Age: <input type="number" name="Age" step="any", placeholder="train range [0.0, 79.0]" required/>
-            <br><br>
             VIP: <input type="text" name="VIP" step="any", placeholder="one of ['False' 'True' 'missing']" required/>
             <br><br>
-            RoomService: <input type="number" name="RoomService" step="any", placeholder="train range [0.0, 14327.0]" required/>
-            <br><br>
-            FoodCourt: <input type="number" name="FoodCourt" step="any", placeholder="train range [0.0, 29813.0]" required/>
-            <br><br>
-            ShoppingMall: <input type="number" name="ShoppingMall" step="any", placeholder="train range [0.0, 29813.0]" required/>
-            <br><br>
-            SPA: <input type="number" name="SPA" step="any", placeholder="train range [0.0, 22408.0]" required/>
-            <br><br>
-            VRDeck: <input type="number" name="VRDeck" step="any", placeholder="train range [0.0, 24133.0]" required/>
-            <br><br>
-            GroupCount: <input type="number" name="GroupCount" step="any", placeholder="train range [1, 8]" required/>
+            NoSpending: <input type="text" name="NoSpending" step="any", placeholder="one of ['False' 'True']" required/>
             <br><br>
             CabinDeck: <input type="text" name="CabinDeck" step="any", placeholder="one of ['B' 'F' 'A' 'G' 'missing' 'E' 'D' 'C' 'T']" required/>
             <br><br>
             CabinSide: <input type="text" name="CabinSide" step="any", placeholder="one of ['P' 'S' 'missing']" required/>
+            <br><br>
+            Solo: <input type="text" name="Solo" step="any", placeholder="one of ['False' 'True']" required/>
             <br><br>
             <button value="Submit">Run</button>
         </form>

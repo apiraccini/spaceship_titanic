@@ -1,12 +1,37 @@
+## app
+
+import platform; print(platform.platform())
+import sys; print("Python", sys.version)
+
 # imports
 
 from flask import Flask, request, render_template
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from catboost import CatBoostClassifier, Pool
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder 
 
+import joblib
+
+# setup
+modelname = 'lgb'
+numerical = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'Expenditure', 'CabinNum', 'GroupSize', 'FamilySize']
+categorical = ['HomePlanet', 'CryoSleep', 'Destination', 'VIP', 'NoSpending', 'CabinDeck', 'CabinSide', 'Solo']
+FEATURES = numerical + categorical
+
+# preprocessing
+cat_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+preproc = ColumnTransformer(
+    transformers=[('cat', cat_encoder, categorical)],
+    verbose_feature_names_out=False,
+    remainder='passthrough'
+)
+
+# load train data and fit preprocessing pipeline
+train = pd.read_csv('./data/final/train.csv')
+preproc = preproc.fit(train[FEATURES])
 
 # declare a Flask app
 app = Flask(__name__) # An instance of this class will be our WSGI application.
@@ -21,33 +46,33 @@ def main():
     if request.method == "POST":
         
         # load model
-        model_path = f'./src/training_files/catboost_best_model'
-        model = CatBoostClassifier()
-        model.load_model(model_path)
+        model_path = f'./src/training_files/{modelname}_best_model.joblib'
+        with open(model_path, 'rb') as file:
+            model = joblib.load(file)
 
         # get values through input bars
-        newdata = []
-        FEATURES = ['HomePlanet', 'CryoSleep', 'Destination', 'Age', 'VIP', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'GroupCount', 'CabinDeck', 'CabinSide']
-        for f in FEATURES:
-            newdata.append(request.form.get(f))
+        newdata = [request.form.get(f) for f in FEATURES]
         
         # prepare prediction data
-        newx = pd.DataFrame([newdata], columns=FEATURES)
-        categorical = ['HomePlanet', 'CryoSleep', 'Destination', 'VIP', 'CabinDeck', 'CabinSide']
-        numerical = list(set(FEATURES)- set(categorical))
+        xtest = pd.DataFrame([newdata], columns=FEATURES)
         hlp = ['float' if _ in numerical else 'str' for _ in FEATURES]
         typedict = {k:v for (k, v) in zip(FEATURES, hlp)}
-        newx = newx.astype(typedict)
-        pool_xtest = Pool(newx, cat_features=categorical)
+        xtest = xtest.astype(typedict)
+        xtest = preproc.transform(xtest)
 
-        # get prediction
-        pred = model.predict(pool_xtest)[0]
-        prediction = 'Transported' if pred==1 else 'Not transported'
+        # prediction
+        preds = model.predict(np.array(xtest))
+        probs = model.predict_proba(xtest)[0][1]
+
+        # output
+        prediction = 'Transported' if preds==1 else 'Not transported'
+        out = f'{prediction} ({probs:.2%})'
+
     else:
-        prediction = ""
+        out = "(waiting for input)"
         
-    return render_template("website.html", output=prediction)
+    return render_template("website.html", output=out)
 
 # run the app
 if __name__ == '__main__':
-    app.run(debug = True) # host=0.0.0.0
+    app.run(host='0.0.0.0') # host=0.0.0.0
