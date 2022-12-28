@@ -18,12 +18,12 @@ import lightgbm as lgb
 import catboost
 
 # setup
-modelname = 'lgb'
+modelname = 'xgb'
 params_path = f'./src/training_files/studies/{modelname}_best_params.joblib'
 
 # load data
-train = pd.read_csv('./data/final_ohe/train.csv')
-test = pd.read_csv('./data/final_ohe/test.csv')
+train = pd.read_csv('./data/final/ohe/train.csv')
+test = pd.read_csv('./data/final/ohe/test.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
@@ -37,7 +37,7 @@ print(f'Missing values:\t{train.isna().sum().sum()}, {test.isna().sum().sum()}\n
 x, x_val, y, y_val = train_test_split(
     train[FEATURES],
     train[TARGET],
-    test_size = 0.2,
+    test_size = 0.15,
     random_state = 42
 )
 

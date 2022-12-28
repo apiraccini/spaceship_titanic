@@ -20,7 +20,7 @@ modelname = 'lgb'
 
 # load data
 train = pd.read_csv('./data/final/train.csv')
-train_ohe = pd.read_csv('./data/final_ohe/train.csv')
+train_ohe = pd.read_csv('./data/final/ohe/train.csv')
 
 TARGET = 'Transported'
 FEATURES = [col for col in train.columns if col not in [TARGET]]
