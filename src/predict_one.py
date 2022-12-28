@@ -14,9 +14,10 @@ import joblib
 
 import xgboost as xgb
 import lightgbm as lgb
+import catboost
 
 # setup
-modelname = 'lgb'
+modelname = 'catboost'
 
 # load data
 train = pd.read_csv('./data/final/train.csv')

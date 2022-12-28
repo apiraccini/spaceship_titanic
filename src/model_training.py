@@ -18,7 +18,7 @@ import lightgbm as lgb
 import catboost
 
 # setup
-modelname = 'xgb'
+modelname = 'catboost'
 params_path = f'./src/training_files/studies/{modelname}_best_params.joblib'
 
 # load data
@@ -48,7 +48,10 @@ print(f"Model: {modelname}\nHyper parameters:")
 for k, v in best_params.items():
     print(f"\t{k}: {v}")
 print('Setting number of trees to 10000 and learning rate to 0.005')
-best_params['n_estimators'] = 10000
+if modelname in ['lgb', 'xgb']:
+    best_params['n_estimators'] = 10000
+elif modelname=='catboost':
+    best_params['num_trees'] = 10000
 best_params['learning_rate'] = 0.005
 
 # define model
@@ -69,11 +72,18 @@ if modelname == 'xgb':
         eval_set= [(x_val, y_val)],
         verbose = 200
     )
-elif modelname == 'lgb' :
+elif modelname == 'lgb':
     model.fit(
         x, y,
         eval_set= [(x_val, y_val)],
         callbacks=[lgb.log_evaluation(200)]
+    )
+elif modelname == 'catboost':
+    model.fit(
+        catboost.Pool(x, y),
+        eval_set=[catboost.Pool(x_val, y_val)],
+        early_stopping_rounds=20,
+        verbose=200
     )
 print(120*'*', '\n')
 
