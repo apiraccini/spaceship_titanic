@@ -16,7 +16,7 @@ from sklearn.preprocessing import OneHotEncoder
 import joblib
 
 # setup
-modelname = 'lgb'
+modelname = 'catboost'
 numerical = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck', 'Expenditure', 'CabinNum', 'GroupSize', 'FamilySize']
 categorical = ['HomePlanet', 'CryoSleep', 'Destination', 'VIP', 'NoSpending', 'CabinDeck', 'CabinSide', 'Solo']
 FEATURES = numerical + categorical
